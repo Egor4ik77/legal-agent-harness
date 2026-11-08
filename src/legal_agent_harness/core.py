@@ -87,7 +87,8 @@ _LOCAL_PATH_RE = re.compile(
     r"(?<![\w./:\\])"
     r"(?:/(?:Users|home|root|tmp|private|var|mnt|Volumes)(?=[/\s\"']|$)"
     r"|~(?=/)|[A-Za-z]:\\)"
-    r"[^\s\"'<>|]*"
+    # Знак препинания в конце («run.log,», «run.log)») — часть текста, не пути.
+    r"(?:[^\s\"'<>|]*[^\s\"'<>|.,;:!?)\]}])?"
 )
 
 REDACTION_PLACEHOLDER = "[REDACTED]"

@@ -83,6 +83,19 @@ def test_redact_local_paths(path):
 
 
 @pytest.mark.parametrize(
+    "text,expected",
+    [
+        ("см. /home/ivanov/run.log, пишите", "см. [REDACTED], пишите"),
+        ("(лог: /home/ivanov/run.log)", "(лог: [REDACTED])"),
+        ("лог в /tmp/ivanov/run.log.", "лог в [REDACTED]."),
+        ("папка ~/ivanov/; дальше", "папка [REDACTED]; дальше"),
+    ],
+)
+def test_redact_keeps_punctuation_after_path(text, expected):
+    assert redact(text) == expected
+
+
+@pytest.mark.parametrize(
     "value",
     [
         "гк-рф/ст.1252",
