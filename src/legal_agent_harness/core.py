@@ -118,9 +118,11 @@ def _redact_phone(match: "re.Match[str]") -> str:
     """Заменяет кандидата, если это номер телефона любой страны.
 
     С «+» — международный формат (E.164): от 8 до 15 цифр. Без «+» —
-    национальный формат: 10–11 цифр минимум в трёх группах
-    («8 (900) 000-00-00», «(202) 555-0123», «020 7946 0000»). Сплошные
-    числа (ИНН, ОГРН), даты и суммы с разрядами («1 000 000 000») не трогаются.
+    национальный формат: 10–11 цифр в 3–5 группах
+    («8 (900) 000-00-00», «(202) 555-0123», «020 7946 0000»). Если группы
+    разделены только пробелами, нужен национальный префикс «8 xxx» или «0…»:
+    иначе это перечень статей («125 126 1270»). Сплошные числа (ИНН, ОГРН),
+    даты и суммы с разрядами («1 000 000 000») не трогаются.
     """
     text = match.group(0)
     if _DATE_IN_TEXT_RE.search(text):
@@ -130,10 +132,15 @@ def _redact_phone(match: "re.Match[str]") -> str:
     if text.startswith("+"):
         is_phone = 8 <= digits <= 15
     else:
+        only_spaces = not re.search(r"[()\-.]", text)
+        has_prefix = (groups[0] == "8" and len(groups[1]) == 3) or (
+            len(groups[0]) >= 2 and groups[0].startswith("0")
+        )
         is_phone = (
             10 <= digits <= 11
-            and len(groups) >= 3
+            and 3 <= len(groups) <= 5
             and not all(len(g) == 3 for g in groups[1:])
+            and (has_prefix or not only_spaces)
         )
     return REDACTION_PLACEHOLDER if is_phone else text
 
