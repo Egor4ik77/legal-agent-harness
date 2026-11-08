@@ -62,7 +62,9 @@ def test_document_fragments_have_no_email():
 
 def test_email_at_length_limit_is_not_cut_in_half():
     # Раньше обрезка до 2000 символов шла до редакции и оставляла «ivanov@ex».
-    review = review_record(_graph(), 7, "x" * 1990 + " ivanov@example.com", "review-test")
+    review = review_record(
+        _graph(), 7, "x" * 1990 + " ivanov@example.com", "review-test"
+    )
     assert len(review["comments"]) <= 2000
     assert "ivanov" not in review["comments"]
 
@@ -79,7 +81,9 @@ def test_review_keeps_legal_metadata():
     assert review["records"][0]["norm_id"] == "document/article/1252"
     assert review["records"][0]["predicate"] == "изложена_в_новой_редакции"
     assert review["records"][0]["effective_from"] == "2017-10-01"
-    assert [e["relation"] for e in review["edges"]] == [e["relation"] for e in graph["edges"]]
+    assert [e["relation"] for e in review["edges"]] == [
+        e["relation"] for e in graph["edges"]
+    ]
     assert review["score"] == 7
     assert review["expert_approved"] is True
 
